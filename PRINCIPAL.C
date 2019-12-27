@@ -1,6 +1,5 @@
 #include "NOME.H"
 #include <stdio.h>
-#include <string.h>
 
 #define SYS_IS_LINUX
 
@@ -52,25 +51,31 @@ int main(int argc, char **argv)
 
     NOM_tppCabecaNome listaDeNomes, listaDeGrupos;
 
-    char *nomeArquivoDeNomes, resposta, numTotalDeAlunos, numDeGrupos, numDeAlunosEmCadaGrupo, numRestanteDeAlunos;
+    char nomeArquivoDeNomes[64], nomeOutputDeGrupos[64], resposta, numTotalDeAlunos, numDeGrupos, numDeAlunosEmCadaGrupo, numRestanteDeAlunos;
 
     if (argc > 1)
-        nomeArquivoDeNomes = argv[1];
+        NOM_stringCopia(nomeArquivoDeNomes, argv[1]);
 
     else
-    {
-        // strcpy(nomeArquivoDeNomes, "nomes.txt");
-        printf("arquivo de nomes não encontrado\n");
-        return 1;
-    }
+        NOM_stringCopia(nomeArquivoDeNomes, "nomes.txt");
 
-    NOM_criarGrupo(&listaDeNomes, nomeArquivoDeNomes, &numTotalDeAlunos);
+    if (argc > 2)
+        NOM_stringCopia(nomeOutputDeGrupos, argv[2]);
 
-    
+    else
+        NOM_stringCopia(nomeOutputDeGrupos, "outputGrupos.txt");
+
+    printf("%s -> %s\n", nomeArquivoDeNomes, nomeOutputDeGrupos);
+
+    NOM_criarListaDeNomes(&listaDeNomes, nomeArquivoDeNomes, &numTotalDeAlunos);
+
+    printf("%d\n",numTotalDeAlunos);
+
+    printf("Os nomes encontrados foram:\n");
 
     NOM_imprimirGrupo(listaDeNomes);
 
-    printf("\nDigite 0 (zero) para escolher o número de grupos ou digite 1 (um) para escolher o número de alunos em cada grupo.");
+    printf("Digite 0 (zero) para escolher o número de grupos ou digite 1 (um) para escolher o número de alunos em cada grupo.");
 
     do
         resposta = getch();
@@ -106,11 +111,11 @@ int main(int argc, char **argv)
     }
 
     if (!numRestanteDeAlunos)
-        printf("Serão formados %d grupos de %d alunos:\n", numDeGrupos, numDeAlunosEmCadaGrupo);
+        printf("Serão formados %d grupos de %d alunos:\n\n", numDeGrupos, numDeAlunosEmCadaGrupo);
 
     else
     {
-        printf("Digite 0 (zero) para formar %d grupos de %d alunos e %d grupos de %d alunos, ou digite 1 (um) para formar %d grupos de %d alunos e %d grupos de %d alunos\n", numDeGrupos - numRestanteDeAlunos, numDeAlunosEmCadaGrupo, numRestanteDeAlunos, numDeAlunosEmCadaGrupo + 1, numDeGrupos, numDeAlunosEmCadaGrupo, 1, numRestanteDeAlunos);
+        printf("Digite 0 (zero) para formar %d grupos de %d alunos e %d grupos de %d alunos, ou digite 1 (um) para formar %d grupos de %d alunos e %d grupos de %d alunos\n\n", numDeGrupos - numRestanteDeAlunos, numDeAlunosEmCadaGrupo, numRestanteDeAlunos, numDeAlunosEmCadaGrupo + 1, numDeGrupos, numDeAlunosEmCadaGrupo, 1, numRestanteDeAlunos);
 
         do
             resposta = getch();
@@ -124,7 +129,23 @@ int main(int argc, char **argv)
 
     NOM_destruirGrupo(listaDeNomes);
 
-    NOM_imprimirGrupos(listaDeGrupos);
+    do
+    {
+
+        NOM_imprimirListaDeGrupos(listaDeGrupos);
+
+        printf("Digite 0 (zero) para salvar os grupos formados em um arquivo txt, ou digite 1 (um) para redistribuir os grupos de alunos\n\n");
+
+        do
+            resposta = getch();
+        while (resposta != '0' && resposta != '1');
+
+        if (resposta == '1')
+            NOM_redistribuirListaDeGrupos(&listaDeGrupos, numDeGrupos, numDeAlunosEmCadaGrupo, numTotalDeAlunos);
+
+    } while (resposta == '1');
+
+    NOM_salvarListaDeGrupos(listaDeGrupos, nomeOutputDeGrupos);
 
     NOM_destruirListaDeGrupos(listaDeGrupos);
 
